@@ -1,7 +1,7 @@
 /**
  * ASEI CS
  * Application Server Event Interface - Client Side
- * Version 1.0.4
+ * Version 0.1.4
  * 
  * Copyright 2013 Geoffrey L. Kuhl
  *
@@ -16,4 +16,172 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Notice:
+ * ASEI does not support legacy browsers such as Internet Explorer
+ * Currently Internet Explorer 10 still does not support SSE technology
+ * so working configurations are currently limited to Firefox, Chromium,
+ * Opera, Safari and any other web standards compliant browser.
+ *
+ * Requires JQuery 2.0+
+ *
+ *@todo  Error Handling at every level in each function
+ *
+ *@author Geoffrey L. Kuhl
+ *@package asei
+ *@subpackage client-side
+ *@version 0.1.4
  */
+function asei(source) {
+
+	/**
+	 * Server source URL of asei connector
+	 * @type {String}
+	 */
+	this.source		= source;
+
+	/**
+	 * Server Connection Object
+	 * @type {Object}
+	 */
+	this.connection	= {};
+
+	/**
+	 * Connection State
+	 * @type {Boolean}
+	 */
+	this.connected	= false;
+
+	/**
+	 * Validate Source
+	 * @type {string}
+	 */
+	if (typeof this.source === "undefined") this.source = 'asei.php';
+
+
+
+	/**
+	 * Connect
+	 * Establish connection to Sever
+	 * @return {Object} Self
+	 */
+	this.connect 	= function() {
+
+		/**
+		 * If window.EventSource is supported then
+		 * instansiate the connection. If window.EventSource
+		 * is not supported then do not attempt to handle, 
+		 * just show an error message and exit
+		 */
+		if (!!window.EventSource) {
+			this.connection = new EventSource(this.source);
+			this.connected	= true;
+			return this;
+		} else {
+			this.ieError();
+			this.connected	= false;
+			return false;
+		}
+
+		/* Return Self */
+		return this;
+	}
+
+
+
+	/**
+	 * Disconnect
+	 * Disconnect from Server
+	 * @return {object} Self
+	 */
+	this.disconnect	= function() {
+		/* Terminate Connection to Server */
+		this.connection.close();
+
+		/* Return Self */
+		return this;
+	}
+
+
+
+	/**
+	 * Listen For
+	 * Register server-side event / client-side handler
+	 * @param  {String}   eventName
+	 * @param  {Function} callback
+	 * @return {object} Self
+	 */
+	this.listenFor	= function(eventName, callback) {
+
+		/**
+		 * If not connected, attempt to connect
+		 */
+		if (!this.connected) this.connect();
+
+		/**
+		 * Add Callback Event Listener
+		 */
+		this.connection.addEventListener(eventName, callback, false);
+
+		/* Return Self */
+		return this;
+	}
+
+
+
+	/**
+	 * Request From
+	 * Send xmlHTTP POST request
+	 *
+	 * @param  {JSON} data
+	 * @param  {Function} callback
+	 * @return {Object} Self
+	 */
+	this.requestFrom	= function(data, callback) {
+		/** JQuery POST Request **/
+		$.post(this.source, data, function(data){
+			callback(data);
+		}, "json");
+
+		/* Return Self */
+		return this;
+	}
+
+
+
+	/**
+	 * Internet Explorer Error
+	 * ieError prints out an error to the end-user to
+	 * get a good browser.
+	 * @return {[type]}
+	 */
+	this.ieError 	= function() {
+		window.onload	= function() {
+			document.body.innerHTML = 
+				"<h4>Your Browser does not support SSE and this page will not continue</h4>" +
+				"<p>Please use a Web-Standards Browser Like Firefox, Chrome, Opera, or Safari</p>" +
+				"<hr/>"
+			;
+		}
+
+		/* Return Self */
+		return this;
+	}
+
+
+
+	/**
+	 *@returns {object} Self
+	 */
+	return this;
+}
+
+
+/**
+ * onServer and _
+ * Shorthand for ASEI
+ * @type {Object} onServer
+ * @type {Function} _
+ */
+var onServer	= new asei();
+var _			= asei;
