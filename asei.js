@@ -1,7 +1,7 @@
 /**
  * ASEI CS
  * Application Server Event Interface - Client Side
- * Version 0.1.4
+ * Version 0.1.5
  * 
  * Copyright 2013 Geoffrey L. Kuhl
  *
@@ -18,52 +18,58 @@
  * limitations under the License.
  *
  * Notice:
- * ASEI does not support legacy browsers such as Internet Explorer
- * Currently Internet Explorer 10 still does not support SSE technology
+ * ASEI does not support legacy browsers such as Internet Explorer.
+ * Currently, Internet Explorer 10 does not support SSE technology
  * so working configurations are currently limited to Firefox, Chromium,
- * Opera, Safari and any other web standards compliant browser.
+ * Opera, Safari and any other web-standard compliant browser.
  *
- * Requires JQuery 2.0+
+ * Requires jQuery 2.0.3
  *
  *@todo  Error Handling at every level in each function
  *
  *@author Geoffrey L. Kuhl
  *@package asei
  *@subpackage client-side
- *@version 0.1.4
+ *@version 0.1.5
+ *
+ *@param String source The source can be a relative or absolute url of the server respondent.
+ *                     the source is optional and when not passed will default to a relative 
+ *                     path of ./request/ which may require some url re-writing. It is
+ *                     perferred to always supply the source url.
+ *
  */
 function asei(source) {
 
 	/**
 	 * Server source URL of asei connector
-	 * @type {String}
+	 * @type String
 	 */
 	this.source		= source;
 
 	/**
 	 * Server Connection Object
-	 * @type {Object}
+	 * @type Object
 	 */
 	this.connection	= {};
 
 	/**
 	 * Connection State
-	 * @type {Boolean}
+	 * @type Boolean
 	 */
 	this.connected	= false;
 
 	/**
 	 * Validate Source
-	 * @type {string}
+	 * @type String
 	 */
-	if (typeof this.source === "undefined") this.source = 'asei.php';
+	if (typeof this.source === "undefined") this.source = 'request/';
 
 
 
 	/**
 	 * Connect
 	 * Establish connection to Sever
-	 * @return {Object} Self
+	 * @return Object Self
 	 */
 	this.connect 	= function() {
 
@@ -76,12 +82,26 @@ function asei(source) {
 		if (!!window.EventSource) {
 			this.connection = new EventSource(this.source);
 			this.connected	= true;
-			return this;
 		} else {
 			this.ieError();
 			this.connected	= false;
 			return false;
 		}
+
+		/** Handle Error Event **/
+		this.connection.addEventListener('error', function(event) {
+			if (event.readyState == EventSource.CLOSED) {
+				this.connected = false;
+			} else {
+				this.disconnect();
+			}
+		});
+
+		/** Handle Close Request **/
+		this.connection.addEventListener('close', function(event) {
+			this.disconnect();
+		});
+
 
 		/* Return Self */
 		return this;
@@ -92,11 +112,13 @@ function asei(source) {
 	/**
 	 * Disconnect
 	 * Disconnect from Server
-	 * @return {object} Self
+	 * @return Object Self
 	 */
 	this.disconnect	= function() {
+
 		/* Terminate Connection to Server */
 		this.connection.close();
+		this.connected = false;
 
 		/* Return Self */
 		return this;
@@ -107,9 +129,9 @@ function asei(source) {
 	/**
 	 * Listen For
 	 * Register server-side event / client-side handler
-	 * @param  {String}   eventName
-	 * @param  {Function} callback
-	 * @return {object} Self
+	 * @param  String	eventName Name of the event to listen for
+	 * @param  Function callback Name of callback function
+	 * @return Object 	Self
 	 */
 	this.listenFor	= function(eventName, callback) {
 
@@ -133,13 +155,14 @@ function asei(source) {
 	 * Request From
 	 * Send xmlHTTP POST request
 	 *
-	 * @param  {JSON} data
-	 * @param  {Function} callback
-	 * @return {Object} Self
+	 * @param  JSON 	data
+	 * @param  Function callback
+	 * @return Object 	Self
 	 */
 	this.requestFrom	= function(data, callback) {
-		/** JQuery POST Request **/
-		$.post(this.source, data, function(data){
+
+		/** jQuery POST Request **/
+		$.post(this.source, data, function(data) {
 			callback(data);
 		}, "json");
 
@@ -153,7 +176,7 @@ function asei(source) {
 	 * Internet Explorer Error
 	 * ieError prints out an error to the end-user to
 	 * get a good browser.
-	 * @return {[type]}
+	 * @return Object Self
 	 */
 	this.ieError 	= function() {
 		window.onload	= function() {
@@ -171,7 +194,7 @@ function asei(source) {
 
 
 	/**
-	 *@returns {object} Self
+	 *@return Object Self
 	 */
 	return this;
 }
@@ -180,8 +203,9 @@ function asei(source) {
 /**
  * onServer and _
  * Shorthand for ASEI
- * @type {Object} onServer
- * @type {Function} _
+ * 
+ * @type Object		onServer	A ready-to-go object connecting to ./request/
+ * @type Function 	_ 			Shorthand for asei()
  */
 var onServer	= new asei();
 var _			= asei;
