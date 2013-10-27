@@ -34,7 +34,7 @@
  *
  *@param String source The source can be a relative or absolute url of the server respondent.
  *                     the source is optional and when not passed will default to a relative 
- *                     path of ./request/ which may require some url re-writing. It is
+ *                     path of ./asei.php which may require some url re-writing. It is
  *                     perferred to always supply the source url.
  *
  */
@@ -62,7 +62,7 @@ function asei(source) {
 	 * Validate Source
 	 * @type String
 	 */
-	if (typeof this.source === "undefined") this.source = 'request/';
+	if (typeof this.source === "undefined") this.source = 'asei.php';
 
 
 
