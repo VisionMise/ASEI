@@ -287,14 +287,12 @@
 		 */
 		private function sendJSON($data, $error = false) {
 
-			/** Attach Error if needed **/
-			if ($error) $data = array('error' => $data);
-
 			/** Create Standard Return Struction **/
 			$return 	= array(
-				'result'	=> $data,
+				'result'	=> ($error) ? null : $data,
 				'request'	=> $this->postedRequest,
-				'timestamp'	=> date(self::dateTime_format)
+				'timestamp'	=> date(self::dateTime_format),
+				'error'		=> ($error) ? $data : false
 			);
 
 			print json_encode($return);
