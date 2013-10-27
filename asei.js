@@ -18,10 +18,10 @@
  * limitations under the License.
  *
  * Notice:
- * ASEI does not support legacy browsers such as Internet Explorer
- * Currently Internet Explorer 10 still does not support SSE technology
+ * ASEI does not support legacy browsers such as Internet Explorer.
+ * Currently, Internet Explorer 10 does not support SSE technology
  * so working configurations are currently limited to Firefox, Chromium,
- * Opera, Safari and any other web standards compliant browser.
+ * Opera, Safari and any other web-standard compliant browser.
  *
  * Requires JQuery 2.0+
  *
