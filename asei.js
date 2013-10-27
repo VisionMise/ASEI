@@ -89,18 +89,10 @@ function asei(source) {
 		}
 
 		/** Handle Error Event **/
-		this.connection.addEventListener('error', function(event) {
-			if (event.readyState == EventSource.CLOSED) {
-				this.connected = false;
-			} else {
-				this.disconnect();
-			}
-		});
+		this.connection.addEventListener('error', this.disconnect);
 
 		/** Handle Close Request **/
-		this.connection.addEventListener('close', function(event) {
-			this.disconnect();
-		});
+		this.connection.addEventListener('close', this.disconnect);
 
 
 		/* Return Self */
@@ -115,6 +107,12 @@ function asei(source) {
 	 * @return Object Self
 	 */
 	this.disconnect	= function() {
+
+		/* Check Object before attempting disconnect */
+		if (typeof this.connection === "undefined") {
+			this.connected = false;
+			return this;
+		}
 
 		/* Terminate Connection to Server */
 		this.connection.close();
